@@ -2,10 +2,44 @@ import { Request, Response } from 'express'
 import { CartService } from '../services/CartService.js'
 import { Money } from '../domain/value-objects/Money.js'
 
+interface CartResponseItem {
+  product: {
+    productId: string
+    name: string
+    price: {
+      amount: number
+      currency: string
+    }
+  }
+  quantity: number
+}
+
+interface CartResponse {
+  sessionId: string
+  items: CartResponseItem[]
+}
+
+interface ServiceCartItem {
+  product: { productId: string; name: string; price: Money }
+  quantity: number
+}
+
+interface ServiceCart {
+  sessionId: string
+  cartItems: readonly ServiceCartItem[]
+}
+
+interface CheckoutResponse {
+  orderId: string
+  total: {
+    amount: number
+    currency: string
+  }
+  checkedOutAt: string
+}
+
 export class CartController {
   constructor(private readonly service: CartService) {}
-
-  // extract and validate sessionId from request params
 
   private getSessionId(req: Request): string {
     const { sessionId } = req.params
@@ -15,11 +49,10 @@ export class CartController {
     return sessionId
   }
 
-  //formartCart for API response
-  private formatCart(cart: any) {
+  private formatCart(cart: ServiceCart): CartResponse {
     return {
       sessionId: cart.sessionId,
-      items: cart.cartItems.map((item: any) => ({
+      items: cart.cartItems.map(item => ({
         product: {
           productId: item.product.productId,
           name: item.product.name,
@@ -33,10 +66,10 @@ export class CartController {
     }
   }
 
-  //POST; adding item to cart 
+  // add item to cart
   addItem = async (
     req: Request,
-    res: Response<any, Record<string, any>>
+    res: Response<CartResponse | { error: string }>
   ): Promise<void> => {
     try {
       const sessionId = this.getSessionId(req)
@@ -54,34 +87,37 @@ export class CartController {
       )
 
       res.status(200).json(this.formatCart(cart))
-    } catch (error: any) {
-      res.status(400).json({ error: error.message })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      res.status(400).json({ error: message })
     }
   }
 
-  //GET; retrieving cart contents
+  // retrieve items from cart
   getCart = async (
     req: Request,
-    res: Response<any, Record<string, any>>
+    res: Response<CartResponse | { error: string }>
   ): Promise<void> => {
     try {
       const sessionId = this.getSessionId(req)
       const cart = await this.service.getCart(sessionId)
+
       if (!cart) {
         res.status(404).json({ error: 'Cart not found' })
         return
       }
+
       res.status(200).json(this.formatCart(cart))
-    } catch (error: any) {
-      res.status(400).json({ error: error.message })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      res.status(400).json({ error: message })
     }
   }
 
-  
-  //DELETE; removing item(s) from cart
+  // delete items from cart
   removeItem = async (
     req: Request,
-    res: Response<any, Record<string, any>>
+    res: Response<CartResponse | { error: string }>
   ): Promise<void> => {
     try {
       const sessionId = this.getSessionId(req)
@@ -94,22 +130,32 @@ export class CartController {
 
       const cart = await this.service.removeItem(sessionId, itemId)
       res.status(200).json(this.formatCart(cart))
-    } catch (error: any) {
-      res.status(400).json({ error: error.message })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      res.status(400).json({ error: message })
     }
   }
 
-  //POST; checkout the cart
+  // checkout cart
   checkout = async (
     req: Request,
-    res: Response<any, Record<string, any>>
+    res: Response<CheckoutResponse | { error: string }>
   ): Promise<void> => {
     try {
       const sessionId = this.getSessionId(req)
       const result = await this.service.checkout(sessionId)
-      res.status(200).json(result)
-    } catch (error: any) {
-      res.status(400).json({ error: error.message })
+
+      res.status(200).json({
+        orderId: result.orderId,
+        total: {
+          amount: result.total.amount,
+          currency: result.total.currency,
+        },
+        checkedOutAt: result.checkedOutAt.toISOString(),
+      })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      res.status(400).json({ error: message })
     }
   }
 }
