@@ -4,9 +4,20 @@ import { CartController } from './CartController'
 import { CartService } from '../services/CartService'
 import { Money } from '../domain/value-objects/Money'
 
-type MockResponse = Response & {
-  status: ReturnType<typeof vi.fn>
-  json: ReturnType<typeof vi.fn>
+interface CartItemMock {
+  product: { productId: string; name: string; price: Money }
+  quantity: number
+}
+
+interface CartMock {
+  sessionId: string
+  cartItems: CartItemMock[]
+}
+
+interface CheckoutMock {
+  orderId: string
+  total: Money
+  checkedOutAt: Date
 }
 
 describe('CartController', () => {
@@ -24,19 +35,12 @@ describe('CartController', () => {
     controller = new CartController(mockService)
   })
 
-  function createRes(): MockResponse {
+  function createRes(): Response {
     return {
       status: vi.fn().mockReturnThis(),
       json: vi.fn(),
-    } as unknown as MockResponse
+    } as unknown as Response
   }
-
-  const mockMoney: Money = {
-    amount: 100,
-    currency: 'USD',
-    add: vi.fn(),
-    multiply: vi.fn(),
-  } as unknown as Money
 
   it('addItem calls service.addItem and returns cart', async () => {
     const req = {
@@ -45,65 +49,69 @@ describe('CartController', () => {
     } as Partial<Request> as Request
 
     const res = createRes()
+    const cartMock: CartMock = { sessionId: 's1', cartItems: [] }
 
-    vi.spyOn(mockService, 'addItem').mockResolvedValue({
-      sessionId: 's1',
-      cartItems: [],
-    } as any) // ignore full Cart type in test
+    // no type errors here
+    ;(mockService.addItem as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(cartMock)
 
     await controller.addItem(req, res)
 
-    expect(mockService.addItem).toHaveBeenCalled()
+    expect(mockService.addItem).toHaveBeenCalledWith(
+      's1',
+      { productId: 'p1', name: 'Test', price: new Money(10) },
+      2
+    )
     expect(res.status).toHaveBeenCalledWith(200)
-    expect(res.json).toHaveBeenCalled()
+    expect(res.json).toHaveBeenCalledWith({ sessionId: 's1', items: [] })
   })
 
   it('getCart calls service.getCart and returns cart', async () => {
     const req = { params: { sessionId: 's1' } } as Partial<Request> as Request
     const res = createRes()
+    const cartMock: CartMock = { sessionId: 's1', cartItems: [] }
 
-    vi.spyOn(mockService, 'getCart').mockResolvedValue({
-      sessionId: 's1',
-      cartItems: [],
-    } as any)
+    ;(mockService.getCart as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(cartMock)
 
     await controller.getCart(req, res)
 
-    expect(mockService.getCart).toHaveBeenCalled()
+    expect(mockService.getCart).toHaveBeenCalledWith('s1')
     expect(res.status).toHaveBeenCalledWith(200)
-    expect(res.json).toHaveBeenCalled()
+    expect(res.json).toHaveBeenCalledWith({ sessionId: 's1', items: [] })
   })
 
   it('removeItem calls service.removeItem and returns cart', async () => {
     const req = { params: { sessionId: 's1', itemId: 'p1' } } as Partial<Request> as Request
     const res = createRes()
+    const cartMock: CartMock = { sessionId: 's1', cartItems: [] }
 
-    vi.spyOn(mockService, 'removeItem').mockResolvedValue({
-      sessionId: 's1',
-      cartItems: [],
-    } as any)
+    ;(mockService.removeItem as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(cartMock)
 
     await controller.removeItem(req, res)
 
-    expect(mockService.removeItem).toHaveBeenCalled()
+    expect(mockService.removeItem).toHaveBeenCalledWith('s1', 'p1')
     expect(res.status).toHaveBeenCalledWith(200)
-    expect(res.json).toHaveBeenCalled()
+    expect(res.json).toHaveBeenCalledWith({ sessionId: 's1', items: [] })
   })
 
   it('checkout calls service.checkout and returns result', async () => {
     const req = { params: { sessionId: 's1' } } as Partial<Request> as Request
     const res = createRes()
-
-    vi.spyOn(mockService, 'checkout').mockResolvedValue({
+    const checkoutMock: CheckoutMock = {
       orderId: 'O1',
-      total: mockMoney,
+      total: new Money(100, 'USD'),
       checkedOutAt: new Date(),
-    } as any)
+    }
+
+    ;(mockService.checkout as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(checkoutMock)
 
     await controller.checkout(req, res)
 
-    expect(mockService.checkout).toHaveBeenCalled()
+    expect(mockService.checkout).toHaveBeenCalledWith('s1')
     expect(res.status).toHaveBeenCalledWith(200)
-    expect(res.json).toHaveBeenCalled()
+    expect(res.json).toHaveBeenCalledWith({
+      orderId: 'O1',
+      total: { amount: 100, currency: 'USD' },
+      checkedOutAt: checkoutMock.checkedOutAt.toISOString(),
+    })
   })
 })

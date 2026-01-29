@@ -14,6 +14,8 @@ export class CartService {
       cart = new Cart(sessionId)
     }
 
+
+    
     cart.addItem(product, quantity)
     await this.repo.save(cart)
     return cart

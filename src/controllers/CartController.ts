@@ -52,7 +52,7 @@ export class CartController {
   private formatCart(cart: ServiceCart): CartResponse {
     return {
       sessionId: cart.sessionId,
-      items: cart.cartItems.map(item => ({
+      items: cart.cartItems.map((item) => ({
         product: {
           productId: item.product.productId,
           name: item.product.name,
@@ -65,7 +65,7 @@ export class CartController {
       })),
     }
   }
-
+  //add items to cart
   addItem = async (
     req: Request,
     res: Response<CartResponse | { error: string }>
@@ -91,7 +91,8 @@ export class CartController {
       res.status(400).json({ error: message })
     }
   }
-
+  
+  //retrieves items from the cart
   getCart = async (
     req: Request,
     res: Response<CartResponse | { error: string }>
@@ -111,7 +112,7 @@ export class CartController {
       res.status(400).json({ error: message })
     }
   }
-
+  //delete items from cart
   removeItem = async (
     req: Request,
     res: Response<CartResponse | { error: string }>
@@ -132,7 +133,7 @@ export class CartController {
       res.status(400).json({ error: message })
     }
   }
-
+  //checkout cart
   checkout = async (
     req: Request,
     res: Response<CheckoutResponse | { error: string }>
