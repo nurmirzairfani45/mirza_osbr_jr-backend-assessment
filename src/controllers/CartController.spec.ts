@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Request, Response } from 'express'
 import { CartController } from './CartController'
 import { CartService } from '../services/CartService'
+import { Money } from '../domain/value-objects/Money'
 
 type MockResponse = Response & {
   status: ReturnType<typeof vi.fn>
@@ -30,6 +31,13 @@ describe('CartController', () => {
     } as unknown as MockResponse
   }
 
+  const mockMoney: Money = {
+    amount: 100,
+    currency: 'USD',
+    add: vi.fn(),
+    multiply: vi.fn(),
+  } as unknown as Money
+
   it('addItem calls service.addItem and returns cart', async () => {
     const req = {
       params: { sessionId: 's1' },
@@ -41,7 +49,7 @@ describe('CartController', () => {
     vi.spyOn(mockService, 'addItem').mockResolvedValue({
       sessionId: 's1',
       cartItems: [],
-    })
+    } as any) // ignore full Cart type in test
 
     await controller.addItem(req, res)
 
@@ -51,16 +59,13 @@ describe('CartController', () => {
   })
 
   it('getCart calls service.getCart and returns cart', async () => {
-    const req = {
-      params: { sessionId: 's1' },
-    } as Partial<Request> as Request
-
+    const req = { params: { sessionId: 's1' } } as Partial<Request> as Request
     const res = createRes()
 
     vi.spyOn(mockService, 'getCart').mockResolvedValue({
       sessionId: 's1',
       cartItems: [],
-    })
+    } as any)
 
     await controller.getCart(req, res)
 
@@ -70,16 +75,13 @@ describe('CartController', () => {
   })
 
   it('removeItem calls service.removeItem and returns cart', async () => {
-    const req = {
-      params: { sessionId: 's1', itemId: 'p1' },
-    } as Partial<Request> as Request
-
+    const req = { params: { sessionId: 's1', itemId: 'p1' } } as Partial<Request> as Request
     const res = createRes()
 
     vi.spyOn(mockService, 'removeItem').mockResolvedValue({
       sessionId: 's1',
       cartItems: [],
-    })
+    } as any)
 
     await controller.removeItem(req, res)
 
@@ -89,17 +91,14 @@ describe('CartController', () => {
   })
 
   it('checkout calls service.checkout and returns result', async () => {
-    const req = {
-      params: { sessionId: 's1' },
-    } as Partial<Request> as Request
-
+    const req = { params: { sessionId: 's1' } } as Partial<Request> as Request
     const res = createRes()
 
     vi.spyOn(mockService, 'checkout').mockResolvedValue({
       orderId: 'O1',
-      total: { amount: 100, currency: 'USD' },
+      total: mockMoney,
       checkedOutAt: new Date(),
-    })
+    } as any)
 
     await controller.checkout(req, res)
 

@@ -66,7 +66,6 @@ export class CartController {
     }
   }
 
-  // add item to cart
   addItem = async (
     req: Request,
     res: Response<CartResponse | { error: string }>
@@ -93,7 +92,6 @@ export class CartController {
     }
   }
 
-  // retrieve items from cart
   getCart = async (
     req: Request,
     res: Response<CartResponse | { error: string }>
@@ -114,7 +112,6 @@ export class CartController {
     }
   }
 
-  // delete items from cart
   removeItem = async (
     req: Request,
     res: Response<CartResponse | { error: string }>
@@ -136,7 +133,6 @@ export class CartController {
     }
   }
 
-  // checkout cart
   checkout = async (
     req: Request,
     res: Response<CheckoutResponse | { error: string }>

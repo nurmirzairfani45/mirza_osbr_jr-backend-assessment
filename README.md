@@ -1,4 +1,4 @@
-# Backend Service (Typescript) - Shopping Cart
+# TASK1; Backend Service (Typescript) - Shopping Cart
 
 A **TypeScript-based shopping cart REST API** demonstrating clean code practices, domain modeling, and basic backend design patterns. This project was developed as part of a Junior Backend Developer technical assessment.
 
@@ -205,6 +205,34 @@ Quantity must be positive.
 Checkout clears the cart and returns an order with total and orderId.
 In-memory storage resets when the server restarts.
 
-### Author
-Nur Mirza Irfani Binti Ahmad Hafizal
-GitHub: https://github.com/nurmirzairfani45/mirza_osbr_jr-backend-assessment
+
+# TASK2; GitHub Actions CI Pipeline
+
+A basic CI pipeline was implemented using GitHub Actions to automate code
+quality checks and testing. The goal is to catch errors early and maintain
+code quality before merging into the main branch.
+
+### Workflow
+- Triggered on pull requests to the `main` branch
+- Runs linting and tests in parallel jobs
+- Provides fast feedback to developers
+
+### Jobs
+- **Lint**
+  - Checks code quality using ESLint
+  - Runs via `npm run lint` (used `npx eslint` locally for testing)
+- **Test**
+  - Runs automated unit tests
+  - Runs `npm run test:coverage` to check test coverage
+
+
+### Design Choices & Trade-offs
+- **Local development vs CI:** Locally we use `npm install` instead of `npm ci` due to Windows/OneDrive permission issues. In CI, `npm ci` ensures a clean, reproducible environment.
+- **npx vs global ESLint:** Used `npx eslint` to avoid global installs.
+- **Separate lint/test jobs:** Running jobs in parallel improves feedback speed, but slightly increases pipeline complexity.
+
+### Quality Assurance
+- Ensures ESLint rules pass before merging
+- Automatically runs tests on every pull request
+- Provides test coverage visibility
+- Jobs can run in parallel for faster feedback
