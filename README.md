@@ -236,3 +236,27 @@ code quality before merging into the main branch.
 - Automatically runs tests on every pull request
 - Provides test coverage visibility
 - Jobs can run in parallel for faster feedback
+
+# TASK3; Terraform Infrastructure 
+## Infrastructure Components
+- **VPC**: Virtual Private Cloud to isolate our app network.
+- **Public Subnet**: For the Load Balancer (internet-facing).
+- **Private Subnet**: For ECS containers (app) to keep them private.
+- **Security Group**: Only allows port 3000 inside VPC, blocks all unnecessary access.
+- **ECS Cluster**: Hosts our containerized shopping cart API.
+
+## Security Decisions
+- Public subnet: only LB can be public.
+- Private subnet: app containers stay private for safety.
+- Open port 3000 only internally, not public internet.
+- Outbound traffic allowed for API to call other services if needed.
+
+## Architecture Diagram
+Internet
+  ↓
+Load Balancer (Public Subnet)
+  ↓
+Shopping Cart API (ECS Fargate in Private Subnet)
+  ↓
+In-Memory Storage
+
