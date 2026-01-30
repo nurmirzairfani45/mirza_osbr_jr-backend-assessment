@@ -260,3 +260,18 @@ Shopping Cart API (ECS Fargate in Private Subnet)
   ↓
 In-Memory Storage
 
+# Task4; Testing
+1. Unit tests are written using Vitest
+2. Tests are placed next to the source files they test
+3. Focused on business logic, services, and repositories
+
+### Coverage Summary
+-Overall coverage: ~79%
+-Domain logic coverage: >85%
+-Repository coverage: 100%
+
+This exceeds the required 70% coverage for business logic.
+
+### Running Tests
+npm run test
+npm run test:coverage
