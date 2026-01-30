@@ -333,6 +333,8 @@ Shopping Cart API (ECS Fargate in Private Subnet)
   ↓
 In-Memory Storage
 
+For full details on the Terraform infrastructure, see [infra/terraform/README.md](infra/terraform/README.md)
+
 # Task4; Testing
 1. Unit tests are written using Vitest
 2. Tests are placed next to the source files they test
