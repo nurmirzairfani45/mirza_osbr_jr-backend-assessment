@@ -37,31 +37,50 @@ The focus is on **clean code, separation of concerns, unit testing**, and **doma
 ---
 
 ## Project Structure
-src/
+mirza_osbr_jr-backend-assessment
+├─ .github/
+│  └─ workflows/
+│     └─ ci.yml           # GitHub Actions CI pipeline
 │
-├─ controllers/
-│ ├─ CartController.spec.ts
-│ └─ CartController.ts
+├─ src/
+│  ├─ domain/             # Business entities and rules
+│  │  ├─ entities/
+│  │  │  ├─ Cart.ts
+│  │  │  └─ Cart.spec.ts
+│  │  ├─ value-objects/
+│  │  │  ├─ Money.ts
+│  │  │  └─ Money.spec.ts
+│  │  └─ errors/
+│  │     └─ DomainError.ts
+│  │
+│  ├─ services/           # Business logic
+│  │  ├─ CartService.ts
+│  │  └─ CartService.spec.ts
+│  │
+│  ├─ repositories/       # Data access layer
+│  │  ├─ CartRepository.ts
+│  │  ├─ InMemoryCartRepository.ts
+│  │  └─ InMemoryCartRepository.spec.ts
+│  │
+│  ├─ controllers/        # HTTP request handlers
+│  │  ├─ CartController.ts
+│  │  └─ CartController.spec.ts
+│  │
+│  └─ server.ts           # Entry point for the API
 │
-├─ domain/
-│ ├─ entities/
-│ │ ├─ Cart.spec.ts
-│ │ └─ Cart.ts
-│ ├─ value-objects/
-│ │ ├─ Money.ts
-│ │ └─ Money.spec.ts
-│ └─ errors/
+├─ infra/
+│  └─ terraform/          # Infrastructure as code
+│     ├─ main.tf
+│     ├─ variables.tf
+│     └─ outputs.tf
 │
-├─ services/
-│ ├─ CartService.spec.ts
-│ └─ CartService.ts
+├─ docs/
+│  ├─ domain-model.md
+│  └─ architecture.md
 │
-├─ repositories/
-│ ├─ CartRepository.ts
-│ ├─ InMemoryCartRepository.spec.ts
-│ └─ InMemoryCartRepository.ts
-│
-└─ server.ts
+├─ package.json
+├─ tsconfig.json
+└─ README.md
 
 - **Controllers**: Handle HTTP requests and responses  
 - **Services**: Contain business logic (e.g., cart operations)  
@@ -83,7 +102,7 @@ src/
 
 ```bash
 git clone <https://github.com/nurmirzairfani45/mirza_osbr_jr-backend-assessment.git>
-cd <osbr_task1>
+cd <mirza_osbr_jr-backend-assessment>
 npm install
 ```
 ### Running the Server
