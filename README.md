@@ -165,33 +165,87 @@ Response
   "checkedOutAt": "2026-01-29T07:31:26.357Z"
 }
 
-### Domain & Design
+### Domain Model Design
+Entities & Value Objects
+1. Cart
 
-Entities
+Properties:
+sessionId: string — unique identifier for the cart session
+items: CartItem[] — array of cart items
 
-Cart — Tracks cart items and session
+Business Rules:
+Can add items, remove items, calculate total, and clear cart
+Adding an existing product increases its quantity
+Cannot add items with zero or negative quantity
 
-CartItem — Holds product and quantity
+Design Decisions:
+Cart encapsulates its items and enforces quantity rules
+Reduces external manipulation, ensuring correct totals and business logic
 
-Product — Represents a purchasable product
+2. CartItem
 
-Value Objects
+Properties:
+product: Product — the associated product
+quantity: number — number of units
 
-Money — Represents price/amount with currency
+Business Rules:
+Quantity must be positive
+Can increase quantity, subtotal calculated via price × quantity
+Design Decisions:
+Encapsulates quantity changes to prevent invalid states
+Ensures subtotal calculation is always correct
 
-Service Layer
+3. Product (interface)
 
-CartService — Encapsulates all cart business logic
+Properties:
+productId: string
+name: string
+price: Money
 
-Repository Pattern
+Design Decisions:
+Lightweight interface; price is handled by Money for precision and currency safety
 
-CartRepository interface
+4. Money (Value Object)
 
-InMemoryCartRepository — Stores cart data in memory
+Properties:
+amount: number — monetary value (non-negative)
+currency: string — defaults to 'USD'
 
-Controller
+Business Rules:
+Cannot be negative
+Addition only allowed for same currency
+Multiplication factor must be positive
 
-CartController — Maps HTTP requests to service methods
+Design Decisions:
+Encapsulates money arithmetic to prevent errors in totals and conversions
+Keeps domain logic type-safe and precise
+
+### Architecture Overview
+
+Controller → Service → Repository → Domain
+
+**Layer interaction**
+- **Controller:** Handles HTTP requests, validates inputs, returns responses
+- **Service:** Contains business logic, calls repository
+- **Repository:** Data access (in-memory)
+- **Domain:** Entities and value objects encapsulate business rules
+
+**Diagram (simplified)**
+
+Client → CartController → CartService → InMemoryCartRepository → Cart/CartItem/Money
+
+### Design Patterns Used
+
+1. **Repository Pattern**
+- CartRepository interface + `InMemoryCartRepository`
+- Purpose: Abstracts data access, allows swapping DB later
+2. **Service Layer**
+- CartService contains business logic
+- Purpose: Separates business rules from HTTP layer
+3. **Value Object**
+- Money object
+- Purpose: Ensures currency consistency and immutability
+
 
 ### Running Tests
 npm test
@@ -275,3 +329,22 @@ This exceeds the required 70% coverage for business logic.
 ### Running Tests
 npm run test
 npm run test:coverage
+
+### DomainError
+A custom error class for domain/business rule violations.
+Used throughout entities and services instead of generic Error.
+
+Examples:
+Adding an item with zero or negative quantity → throws DomainError('Quantity must be positive')
+Removing a non-existent item → throws DomainError('Item not found in cart')
+Checkout an empty cart → throws DomainError('Cannot checkout empty cart')
+Negative money or currency mismatch → throws DomainError
+
+This ensures all domain errors are consistent and easily distinguishable from system/runtime errors.
+
+### Trade-offs & Improvements
+- Used in-memory storage for simplicity, no database persistence
+- No authentication or authorization implemented
+- Checkout operation clears cart immediately (could improve with order persistence)
+- Could add: database storage, logging, caching, and full error handling in production
+

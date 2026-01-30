@@ -1,4 +1,5 @@
 import { Money } from '../value-objects/Money.js'
+import { DomainError } from '../errors/DomainError.js'
 
 export interface Product {
   productId: string
@@ -12,7 +13,7 @@ export class CartItem {
     private _quantity: number
   ) {
     if (_quantity <= 0) {
-      throw new Error('Quantity must be positive')
+      throw new DomainError('Quantity must be positive')
     }
   }
 
@@ -22,7 +23,7 @@ export class CartItem {
 
   increaseQuantity(amount: number): void {
     if (amount <= 0) {
-      throw new Error('Amount must be positive')
+      throw new DomainError('Amount must be positive')
     }
     this._quantity += amount
   }
@@ -43,7 +44,7 @@ export class Cart {
 
   addItem(product: Product, quantity: number): void {
     if (quantity <= 0) {
-      throw new Error('Quantity must be positive')
+      throw new DomainError('Quantity must be positive')
     }
 
     const existing = this.items.find(
@@ -62,7 +63,7 @@ export class Cart {
       item => item.product.productId === productId
     )
     if (index === -1) {
-      throw new Error('Item not found')
+      throw new DomainError('Item not found in cart')
     }
     this.items.splice(index, 1)
   }

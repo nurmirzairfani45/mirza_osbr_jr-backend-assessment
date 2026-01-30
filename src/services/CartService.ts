@@ -1,5 +1,6 @@
 import { Cart, Product } from '../domain/entities/Cart.js'
 import { CartRepository } from '../repositories/CartRepository.js'
+import { DomainError } from '../domain/errors/DomainError.js'
 
 export class CartService {
   constructor(private readonly repo: CartRepository) {}
@@ -14,8 +15,6 @@ export class CartService {
       cart = new Cart(sessionId)
     }
 
-
-    
     cart.addItem(product, quantity)
     await this.repo.save(cart)
     return cart
@@ -28,7 +27,7 @@ export class CartService {
   async removeItem(sessionId: string, productId: string): Promise<Cart> {
     const cart = await this.repo.findBySessionId(sessionId)
     if (!cart) {
-      throw new Error('Cart not found')
+      throw new DomainError('Cart not found')
     }
 
     cart.removeItem(productId)
@@ -39,7 +38,7 @@ export class CartService {
   async checkout(sessionId: string) {
     const cart = await this.repo.findBySessionId(sessionId)
     if (!cart || cart.cartItems.length === 0) {
-      throw new Error('Cannot checkout empty cart')
+      throw new DomainError('Cannot checkout empty cart')
     }
 
     const total = cart.total()
@@ -52,6 +51,4 @@ export class CartService {
       checkedOutAt: new Date()
     }
   }
-
-  
 }
