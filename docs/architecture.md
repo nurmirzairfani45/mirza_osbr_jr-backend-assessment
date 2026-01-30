@@ -1,5 +1,5 @@
 # Folder Structure
-shopping-cart-api/src/
+mirza_osbr_jr-backend-assessment/src/
 │
 ├─ controllers/        # HTTP layer, maps requests to service calls
 │  ├─ CartController.ts
